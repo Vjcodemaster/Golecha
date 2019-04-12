@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="layout_margin_default_small">10dp</dimen>
+    <dimen name="layout_margin_default_medium">20dp</dimen>
+    <dimen name="layout_margin_top_medium">20dp</dimen>
+
+    <dimen name="login_button_width">250dp</dimen>
+    <dimen name="login_button_height">40dp</dimen>
+
+    <dimen name="activity_image_width">160dp</dimen>
+    <dimen name="activity_image_height">100dp</dimen>
+
+    <dimen name="layout_margin_top_large">30dp</dimen>
+
+    <!-- related to progressbar-->
+    <dimen name="layout_margin_progressbar">4dp</dimen>
+</resources>
