@@ -7,7 +7,7 @@ public class DataBaseHelper {
     private int _id;
     //private String _phone_number;
     private int _odoo_id;
-    private int _sales_order_id;
+    private String _sales_order_id;
     private int _sales_order_line_id;
     private int _product_id;
     private String _product_name;
@@ -58,16 +58,17 @@ public class DataBaseHelper {
         this._sub_total = _sub_total;
     }*/
 
-    public DataBaseHelper(int _odoo_id, int _sales_order_id, int _sales_order_line_id, int _product_id,
-                          String _product_name, int _product_quantity, int _unit_price, int _sub_total){
+    public DataBaseHelper(int _odoo_id, String _sales_order_id, String _product_id_string,
+                          String _product_name, String _product_quantity_string, String _unit_price_string, String _sub_total_string,
+                          String _order_status){
         this._odoo_id = _odoo_id;
         this._sales_order_id = _sales_order_id;
-        this._sales_order_line_id = _sales_order_line_id;
-        this._product_id = _product_id;
+        this._product_id_string = _product_id_string;
         this._product_name = _product_name;
-        this._product_quantity = _product_quantity;
-        this._unit_price = _unit_price;
-        this._sub_total = _sub_total;
+        this._product_quantity_string = _product_quantity_string;
+        this._unit_price_string = _unit_price_string;
+        this._sub_total_string = _sub_total_string;
+        this._order_status = _order_status;
     }
 
     // getting ID
@@ -88,11 +89,11 @@ public class DataBaseHelper {
         this._odoo_id = odoo_id;
     }
 
-    public int get_sales_order_id() {
+    public String get_sales_order_id() {
         return this._sales_order_id;
     }
 
-    public void set_sales_order_id(int sales_order_id) {
+    public void set_sales_order_id(String sales_order_id) {
         this._sales_order_id = sales_order_id;
     }
 

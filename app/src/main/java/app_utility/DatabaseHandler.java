@@ -62,13 +62,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String CREATE_INDIVIDUAL_PRODUCTS = "CREATE TABLE " + TABLE_PRODUCTS + "("
                 + KEY_ID + " INTEGER PRIMARY KEY, "
                 + KEY_ODOO_ID + " INTEGER, "
-                + KEY_SALES_ORDER_ID + " INTEGER, "
-                + KEY_SALES_ORDER_LINE_ID + " TEXT, "
+                + KEY_SALES_ORDER_ID + " TEXT, "
+                //+ KEY_SALES_ORDER_LINE_ID + " TEXT, "
                 + KEY_PRODUCT_ID + " TEXT, "
                 + KEY_PRODUCT_NAME + " TEXT, "
                 + KEY_QUANTITY + " TEXT, "
                 + KEY_UNIT_PRICE + " TEXT, "
-                + KEY_SUB_TOTAL + " TEXT)";
+                + KEY_SUB_TOTAL + " TEXT, "
+                + KEY_STATUS + " TEXT)";
 
         String CREATE_TEMP_PRODUCTS = "CREATE TABLE " + TABLE_TEMP_PRODUCTS + "("
                 + KEY_ID + " INTEGER PRIMARY KEY, "
@@ -109,15 +110,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_ID, dataBaseHelper.get_id());
+        //values.put(KEY_ID, dataBaseHelper.get_id());
         values.put(KEY_ODOO_ID, dataBaseHelper.get_odoo_id());
         values.put(KEY_SALES_ORDER_ID, dataBaseHelper.get_sales_order_id());
-        values.put(KEY_SALES_ORDER_LINE_ID, dataBaseHelper.get_sales_order_line_id());
-        values.put(KEY_PRODUCT_ID, dataBaseHelper.get_product_id());
+        //values.put(KEY_SALES_ORDER_LINE_ID, dataBaseHelper.get_sales_order_line_id());
+        values.put(KEY_PRODUCT_ID, dataBaseHelper.get_product_id_string());
         values.put(KEY_PRODUCT_NAME, dataBaseHelper.get_product_name());
-        values.put(KEY_QUANTITY, dataBaseHelper.get_product_quantity());
-        values.put(KEY_UNIT_PRICE, dataBaseHelper.get_unit_price());
-        values.put(KEY_SUB_TOTAL, dataBaseHelper.get_sub_total());
+        values.put(KEY_QUANTITY, dataBaseHelper.get_product_quantity_string());
+        values.put(KEY_UNIT_PRICE, dataBaseHelper.get_unit_price_string());
+        values.put(KEY_SUB_TOTAL, dataBaseHelper.get_sub_total_string());
+        values.put(KEY_STATUS, dataBaseHelper.get_order_status());
 
         db.insert(TABLE_PRODUCTS, null, values);
         //db.insert(TABLE_PERMANENT, null, values);

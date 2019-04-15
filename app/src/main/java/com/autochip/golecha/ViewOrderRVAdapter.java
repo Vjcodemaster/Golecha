@@ -103,6 +103,7 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
             alProducts.add(alDBProductsData.get(i).get_product_name());
             alProductIDInt.add(Integer.valueOf(alDBProductsData.get(i).get_product_id_string()));
         }
+        sStatus = alDBData.get(0).get_order_status();
         mListener = this;
         onAsnycInterface = this;
         networkState = new NetworkState();

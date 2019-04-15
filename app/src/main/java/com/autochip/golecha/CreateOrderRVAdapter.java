@@ -60,6 +60,8 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
 
     CreateOrderRVAdapter.ProductsHolder holder;
 
+    float fTotal;
+
     String sDate, sStatus;
 
     private int count;
@@ -76,7 +78,7 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
 
     private NetworkState networkState;
 
-    private HashMap<String, Integer> hmSelectedProducts = new HashMap<>();
+    private HashMap<Integer, String> hmSelectedProducts = new HashMap<>();
 
     /*CreateOrderRVAdapter(Context context, FragmentManager supportFragmentManager, OnFragmentInteractionListener mListener,
                          LinkedHashMap<Integer, HashMap<String, String>> lhmMyOrdersData) {
@@ -165,25 +167,22 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String sItem = holder.spinner.getSelectedItem().toString();
-                 if (!hmSelectedProducts.containsKey(sItem)) {
-                     holder.tvUnitPrice.setText(alDBProductsData.get(position).get_unit_price_string());
-                     hmSelectedProducts.put(sItem, Integer.valueOf(holder.tvSerialNo.getTag().toString()));
-                 }
-                else {
-                     /*if (hmSelectedProducts.containsKey(sItem)) {
-                         modifyListData(holder);
-                     } else {*/
-                     if(!sItem.equals("Select product")) {
-                         Toast.makeText(context, "This product is already selected", Toast.LENGTH_SHORT).show();
-                         holder.spinner.setSelection(0);
-                     }
-                     //}
+                ArrayList<String> alProductsList = new ArrayList<>(hmSelectedProducts.values());
+                if (!alProductsList.contains(sItem) && holder.spinner.getSelectedItemPosition() != 0) {
+                    holder.tvUnitPrice.setText(alDBProductsData.get(position).get_unit_price_string());
+                    hmSelectedProducts.put(Integer.valueOf(holder.tvSerialNo.getTag().toString()), sItem);
+                    setSubTotal(holder, holder.etQuantity.getEditText().getText().toString());
+                } else if (holder.spinner.getSelectedItemPosition() != 0) {
+                    if (alProductsList.contains(sItem)) {
+                        Toast.makeText(context, "This product is already selected", Toast.LENGTH_SHORT).show();
+                        int nTag = Integer.valueOf(holder.tvSerialNo.getTag().toString());
+                        if (hmSelectedProducts.containsKey(nTag)) {
+                            holder.spinner.setSelection(alProducts.indexOf(hmSelectedProducts.get(nTag)));
+                        } else {
+                            holder.spinner.setSelection(0);
+                        }
+                    }
                 }
-                    /*if (position!=0)
-                        addProductToList(holder);
-                    else
-                        notifyItemRemoved(recyclerView.getAdapter().getItemCount()-1);*/
-
             }
 
             @Override
@@ -270,6 +269,10 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
         if (position == lhmSavedData.size()) {
             isNotifyDataSetCalled = false;
         }
+        holder.spinner.setSelection(0);
+        holder.etQuantity.getEditText().setText("1.0");
+        holder.tvSubTotal.setText("0.0");
+        holder.tvUnitPrice.setText("0.0");
     }
 
     private void increaseSize() {
@@ -282,19 +285,21 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
         //new updateSerialNoAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "1");
         //int nTag = Integer.valueOf(holder.tvSerialNo.getTag().toString()) - 1;
         int nAdapterPosition = holder.getAdapterPosition();
-        View view = recyclerView.getChildAt(nAdapterPosition);
+        //View view = recyclerView.getChildAt(nAdapterPosition);
         //Toast.makeText(context, "" + view.findViewById(R.id.tv_sl_no).getTag().toString(), Toast.LENGTH_SHORT).show();
-        String sTag = holder.tvSerialNo.getTag().toString();
+        //String sTag = holder.tvSerialNo.getTag().toString();
         //for (int i = 0; i < alTVTags.size(); i++) {
         //String sTagCompare = alTVTags.get(i);
         //if (sTagCompare.equals(String.valueOf(sTag))) {
         //alTextViews.remove(alTextViews.get(i));
         //lhmSavedData.remove(Integer.valueOf(sTag));
-
-        hmSelectedProducts.remove(holder.spinner.getSelectedItem().toString());
+        hmSelectedProducts.remove(Integer.valueOf(holder.tvSerialNo.getTag().toString()));
+        //hmSelectedProducts.remove(holder.spinner.getSelectedItem().toString());
         //break;
         //}
         //}
+        fTotal = fTotal - Float.valueOf(holder.tvSubTotal.getText().toString());
+        CreateOrderFragment.mListener.onFragmentMessage("UPDATE_TOTAL", 0, sDate, String.valueOf(fTotal));
         notifyItemRemoved(nAdapterPosition);
     }
 
@@ -311,7 +316,7 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
         alData.add(String.valueOf(holder.spinner.getSelectedItemPosition()));
 
         lhmSavedData.put(Integer.valueOf(holder.tvSerialNo.getTag().toString()), alData);
-        hmSelectedProducts.put(alData.get(1), Integer.valueOf(holder.tvSerialNo.getTag().toString()));
+        //hmSelectedProducts.put(alData.get(1), Integer.valueOf(holder.tvSerialNo.getTag().toString()));
     }
 
     private void addProductToList(CreateOrderRVAdapter.ProductsHolder holder) {
@@ -331,7 +336,7 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
             alData.add(String.valueOf(holder.spinner.getSelectedItemPosition()));
 
             lhmSavedData.put(Integer.valueOf(holder.tvSerialNo.getTag().toString()), alData);
-            hmSelectedProducts.put(alData.get(1), Integer.valueOf(holder.tvSerialNo.getTag().toString()));
+            //hmSelectedProducts.put(alData.get(1), Integer.valueOf(holder.tvSerialNo.getTag().toString()));
             if(sStatus.equals("")) {
                 increaseSize();
                 notifyItemInserted(recyclerView.getAdapter().getItemCount() + 1);
@@ -374,9 +379,26 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
     }
 
     private void setSubTotal(final CreateOrderRVAdapter.ProductsHolder holder, String sQuantity) {
+        float fOldSubTotal = Float.valueOf(holder.tvSubTotal.getText().toString());
+
         fQuantity = Float.valueOf(sQuantity);
         float dTmp = fQuantity * Float.valueOf(holder.tvUnitPrice.getText().toString().trim());
         holder.tvSubTotal.setText(String.valueOf(dTmp));
+
+        if(holder.spinner.getSelectedItemPosition()!=0)
+        updateTotal(dTmp, fOldSubTotal);
+    }
+
+    private void updateTotal(float fNewSubTotal, Float fOldSubTotal) {
+        float fLatestTotal = fOldSubTotal - fNewSubTotal;
+        //if (fLatestTotal<0){
+        fTotal = fTotal - fLatestTotal;
+        /*} else {
+            fTotal = fTotal + fLatestTotal;
+        }*/
+        if (hmSelectedProducts.size() == 0)
+            fTotal = 0;
+        CreateOrderFragment.mListener.onFragmentMessage("UPDATE_TOTAL", 0, sDate, String.valueOf(fTotal));
     }
 
     @Override
@@ -393,8 +415,13 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
     public void onFragmentMessage(String sCase, int nFlag, String sDate, String sStatus) {
         switch (sCase) {
             case "ADD_BUTTON_CLICKED":
+                if (nSizeOfData == hmSelectedProducts.size())
+                    increaseSize();
+                else {
+                    Toast.makeText(context, "Select product before adding another item", Toast.LENGTH_SHORT).show();
+                }
                 //addProductToList(holder);
-                increaseSize();
+                //increaseSize();
                 notifyItemInserted(recyclerView.getAdapter().getItemCount() + 1);
                 break;
             case "SAVE_BUTTON_CLICKED":

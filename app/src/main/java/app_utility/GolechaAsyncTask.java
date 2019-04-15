@@ -3,6 +3,7 @@ package app_utility;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +68,11 @@ public class GolechaAsyncTask extends AsyncTask<String, Void, String> {
     private int ERROR_CODE = 0;
     private String sMsgResult;
     private int type;
-    private int[] IDS = new int[2];
+
+    private int nOdooID;
+    private int[] IDS;
+
+    private ArrayList<String> alSalesID =  new ArrayList<>();
 
     @Override
     protected void onPreExecute() {
@@ -116,6 +121,31 @@ public class GolechaAsyncTask extends AsyncTask<String, Void, String> {
         switch (type) {
             case 2:
                 onAsyncTaskInterface.onAsyncTaskComplete("SUBMITTED_PLACED_DATA", type, null, null);
+                ArrayList<Integer> alKeySet = new ArrayList<>(lhmSavedData.keySet());
+                ArrayList<String> alTmp;
+
+                ArrayList<String> alProductID = new ArrayList<>();
+                ArrayList<String> alProductName = new ArrayList<>();
+                ArrayList<String> alQuantity = new ArrayList<>();
+                ArrayList<String> alUnitPrice = new ArrayList<>();
+                ArrayList<String> alSubTotal = new ArrayList<>();
+                for (int i = 0; i < lhmSavedData.size(); i++) {
+                    alTmp = new ArrayList<>(lhmSavedData.get(alKeySet.get(i)));
+                    alProductID.add(alTmp.get(0));
+                    alProductName.add(alTmp.get(1));
+                    alQuantity.add(alTmp.get(2));
+                    alUnitPrice.add(alTmp.get(3));
+                    alSubTotal.add(alTmp.get(4));
+                }
+                String sSalesID = TextUtils.join(",", alSalesID);
+                String sProductID = TextUtils.join(",", alProductID);
+                String sProductName = TextUtils.join(",", alProductName);
+                String sQuantity = TextUtils.join(",", alQuantity);
+                String sUnitPrice = TextUtils.join(",", alUnitPrice);
+                String sSubTotal = TextUtils.join(",", alSubTotal);
+                String sStatus = "Quotation";
+
+                dbh.addDataToProductsTable(new DataBaseHelper(nOdooID, sSalesID, sProductID, sProductName, sQuantity, sUnitPrice, sSubTotal, sStatus));
                 break;
             case 4:
                 //onAsyncTaskInterface.onAsyncTaskComplete("READ_PRODUCTS", type, lhmProductsWithID, alPosition);
@@ -176,14 +206,14 @@ public class GolechaAsyncTask extends AsyncTask<String, Void, String> {
                 put("partner_id", 562);
                 //put("state", ORDER_STATE[0]);
             }});
-            IDS[0] = createCustomer;
+            nOdooID = createCustomer;
             ArrayList<String> alData;
             ArrayList<Integer> alKeySet = new ArrayList<>(lhmSavedData.keySet());
             for (int i = 0; i < lhmSavedData.size(); i++) {
                 alData = new ArrayList<>(lhmSavedData.get(alKeySet.get(i)));
                 int productID = Integer.valueOf(alData.get(0));
                 float quantity = Float.valueOf(alData.get(2));
-                createOne2Many(productID, quantity, createCustomer);
+                createOne2Many(productID, quantity, createCustomer, i);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -191,7 +221,7 @@ public class GolechaAsyncTask extends AsyncTask<String, Void, String> {
     }
 
 
-    private void createOne2Many(final int productID, final float quantity, final int ID) {
+    private void createOne2Many(final int productID, final float quantity, final int ID, int pos) {
 
         try {
             OdooConnect oc = OdooConnect.connect(SERVER_URL, PORT_NO, DB_NAME, USER_ID, PASSWORD);
@@ -216,7 +246,8 @@ public class GolechaAsyncTask extends AsyncTask<String, Void, String> {
                 //put("product_uom_qty", quantity);
                 put("order_id", ID);
             }});
-
+                    //if(one2Many!=null)
+            alSalesID.add(String.valueOf(one2Many));
             //IDS[1] = one2Many;
 
             Boolean idC = oc.write("sale.order.line", new Object[]{one2Many}, new HashMap() {{

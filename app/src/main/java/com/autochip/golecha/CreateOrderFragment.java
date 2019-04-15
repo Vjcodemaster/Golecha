@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
@@ -39,7 +38,7 @@ import app_utility.OnFragmentInteractionListener;
  * Use the {@link CreateOrderFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CreateOrderFragment extends Fragment {
+public class CreateOrderFragment extends Fragment implements OnFragmentInteractionListener{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -49,13 +48,13 @@ public class CreateOrderFragment extends Fragment {
 
     private String sDate;
 
-    private OnFragmentInteractionListener mListener;
+    public static OnFragmentInteractionListener mListener;
 
     private LinearLayout llBottomSheet;
 
     BottomSheetBehavior sheetBehavior;
 
-    TextView tvSwipe, tvDate;
+    TextView tvSwipe, tvDate, tvTotalAmount;
 
     private CreateOrderRVAdapter createOrderRVAdapter;
     private RecyclerView recyclerView;
@@ -94,7 +93,7 @@ public class CreateOrderFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
+        mListener =  this;
         dbh = new DatabaseHandler(getActivity());
     }
 
@@ -123,6 +122,8 @@ public class CreateOrderFragment extends Fragment {
         tvSwipe = llBottomSheet.findViewById(R.id.tv_swipe);
         btnSaveOrder = llBottomSheet.findViewById(R.id.btn_save_order);
         btnPlaceOrder = llBottomSheet.findViewById(R.id.btn_place_order);
+
+        tvTotalAmount = llBottomSheet.findViewById(R.id.tv_total_amount);
 
         sheetBehavior = BottomSheetBehavior.from(llBottomSheet);
         sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -237,4 +238,12 @@ public class CreateOrderFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onFragmentMessage(String sCase, int nFlag, String sDate, String sStatus) {
+        switch (sCase){
+            case "UPDATE_TOTAL":
+                tvTotalAmount.setText(sStatus);
+                break;
+        }
+    }
 }
