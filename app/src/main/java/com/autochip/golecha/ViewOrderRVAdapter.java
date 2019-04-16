@@ -169,7 +169,7 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
         /*if (sStatus.equals("PLACE_ORDER"))
             holder.spinner.setOnItemSelectedListener(null);
         else*/
-            holder.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            /*holder.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     String sItem = holder.spinner.getSelectedItem().toString();
@@ -226,7 +226,13 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
             public void afterTextChanged(Editable s) {
 
             }
-        });
+        });*/
+        if (!sStatus.equals("PLACE_ORDER")) {
+            initListeners(holder);
+        } else {
+            holder.spinner.setEnabled(false);
+            holder.etQuantity.getEditText().setEnabled(false);
+        }
         if (position < alProductName.size() && !isExecuted) {
             int nIndexSpinner = alProducts.indexOf(alProductName.get(position));
             holder.spinner.setSelection(nIndexSpinner);
@@ -239,7 +245,7 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
             if (position == alProductName.size() - 1) {
                 isExecuted = true;
             }
-        } else {
+        } else if (!sStatus.equals("PLACE_ORDER")) {
             holder.spinner.setSelection(0);
             holder.etQuantity.getEditText().setText("1.0");
             holder.tvSubTotal.setText("0.0");
@@ -247,9 +253,67 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
         }
     }
 
-    private void initListeners(CreateOrderRVAdapter.ProductsHolder holder){
+    private void initListeners(final ViewOrderRVAdapter.ProductsHolder holder) {
+        holder.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String sItem = holder.spinner.getSelectedItem().toString();
+                ArrayList<String> alProductsList = new ArrayList<>(hmSelectedProducts.values());
+                if (!alProductsList.contains(sItem) && holder.spinner.getSelectedItemPosition() != 0) {
+                    holder.tvUnitPrice.setText(alDBProductsData.get(position).get_unit_price_string());
+                    hmSelectedProducts.put(Integer.valueOf(holder.tvSerialNo.getTag().toString()), sItem);
+                    setSubTotal(holder, holder.etQuantity.getEditText().getText().toString());
+                } else if (holder.spinner.getSelectedItemPosition() != 0) {
+                    if (alProductsList.contains(sItem)) {
+                        Toast.makeText(context, "This product is already selected", Toast.LENGTH_SHORT).show();
+                        int nTag = Integer.valueOf(holder.tvSerialNo.getTag().toString());
+                        if (hmSelectedProducts.containsKey(nTag)) {
+                            holder.spinner.setSelection(alProducts.indexOf(hmSelectedProducts.get(nTag)));
+                        } else {
+                            holder.spinner.setSelection(0);
+                        }
+                    }
+                }
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        Objects.requireNonNull(holder.etQuantity.getEditText()).addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                //fPreviousSubTotal = Float.valueOf(holder.tvSubTotal.getText().toString());
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String sQuantity = holder.etQuantity.getEditText().getText().toString().trim();
+                if (!sQuantity.equals("")) {
+                    if (sQuantity.contains(".")) {
+                        setSubTotal(holder, sQuantity);
+                    } else {
+                        String tmp = sQuantity + ".0";
+                        holder.etQuantity.getEditText().setText(tmp);
+                        setSubTotal(holder, sQuantity);
+                    }
+                } else {
+                    sQuantity = "1.0";
+                    holder.etQuantity.getEditText().setText(sQuantity);
+
+                    setSubTotal(holder, sQuantity);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
+
     private void increaseSize() {
         nSizeOfData = nSizeOfData + 1;
     }
@@ -349,7 +413,7 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
     public void onFragmentMessage(String sCase, int nFlag, String sDate, String sStatus) {
         switch (sCase) {
             case "ADD_BUTTON_CLICKED":
-                if (!sStatus.equals("PLACE_ORDER"))
+                if (!this.sStatus.equals("PLACE_ORDER"))
                     if (nSizeOfData == hmSelectedProducts.size())
                         increaseSize();
                 /*else if(hmSelectedProducts.size()>nSizeOfData){
