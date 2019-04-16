@@ -51,7 +51,8 @@ class MyOrdersRVAdapter extends RecyclerView.Adapter<MyOrdersRVAdapter.ProductsH
         String sSizeOfProducts = String.valueOf(lhmMyOrdersData.get(key).get("number_of_products")) + " Products";
         holder.tvTotalProducts.setText(sSizeOfProducts);
 
-        holder.tvDate.setText(lhmMyOrdersData.get(key).get("date"));
+        final String sDate =lhmMyOrdersData.get(key).get("date");
+        holder.tvDate.setText(sDate);
         holder.tvTotalAmount.setText(lhmMyOrdersData.get(key).get("total"));
         holder.tvOrderStatus.setText(lhmMyOrdersData.get(key).get("status"));
 
@@ -61,7 +62,7 @@ class MyOrdersRVAdapter extends RecyclerView.Adapter<MyOrdersRVAdapter.ProductsH
                 Fragment newFragment;
                 FragmentTransaction transaction;
                 String sBackStackParent;
-                newFragment = ViewOrderFragment.newInstance(String.valueOf(key),"");
+                newFragment = ViewOrderFragment.newInstance(String.valueOf(key),sDate);
                 sBackStackParent = newFragment.getClass().getName();
                 transaction = supportFragmentManager.beginTransaction();
                 transaction.replace(R.id.fl_container, newFragment, sBackStackParent);

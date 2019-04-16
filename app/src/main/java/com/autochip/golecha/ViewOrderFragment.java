@@ -235,6 +235,7 @@ public class ViewOrderFragment extends Fragment implements OnFragmentInteraction
         });
         sDate = alDBData.get(0).get_delivery_date();
         tvDate.setText(sDate);
+        ViewOrderRVAdapter.mListener.onFragmentMessage("CHANGED_DATE", 0, sDate, "NO_STATUS");
     }
 
     @Override

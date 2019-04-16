@@ -448,6 +448,9 @@ class CreateOrderRVAdapter extends RecyclerView.Adapter<CreateOrderRVAdapter.Pro
                     new updateSerialNoAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "2");
                 }
                 break;
+            case "CHANGED_DATE":
+                this.sDate = sDate;
+                break;
         }
     }
 

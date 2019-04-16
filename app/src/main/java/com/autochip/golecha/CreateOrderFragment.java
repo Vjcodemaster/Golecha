@@ -135,8 +135,9 @@ public class CreateOrderFragment extends Fragment implements OnFragmentInteracti
 
     private void setUpViews() {
         Date date = new Date();
-        String modifiedDate = new SimpleDateFormat("dd-MM-yyyy", Locale.US).format(date);
-        tvDate.setText(modifiedDate);
+        sDate = new SimpleDateFormat("dd-MM-yyyy", Locale.US).format(date);
+        tvDate.setText(sDate);
+        //CreateOrderRVAdapter.mListener.onFragmentMessage("CHANGED_DATE", 0, sDate, "NO_STATUS");
 
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mLinearLayoutManager.setOrientation(RecyclerView.VERTICAL);
@@ -210,6 +211,7 @@ public class CreateOrderFragment extends Fragment implements OnFragmentInteracti
                         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
                         sDate = sdf.format(myCalendar.getTime());
                         tvDate.setText(sDate);
+
                     }
 
                 };

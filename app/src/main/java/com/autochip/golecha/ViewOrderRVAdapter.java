@@ -166,33 +166,36 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
         };
         holder.spinner.setAdapter(adapter);
 
-        holder.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String sItem = holder.spinner.getSelectedItem().toString();
-                ArrayList<String> alProductsList = new ArrayList<>(hmSelectedProducts.values());
-                if (!alProductsList.contains(sItem) && holder.spinner.getSelectedItemPosition() != 0) {
-                    holder.tvUnitPrice.setText(alDBProductsData.get(position).get_unit_price_string());
-                    hmSelectedProducts.put(Integer.valueOf(holder.tvSerialNo.getTag().toString()), sItem);
-                    setSubTotal(holder, holder.etQuantity.getEditText().getText().toString());
-                } else if (holder.spinner.getSelectedItemPosition() != 0) {
-                    if (alProductsList.contains(sItem)) {
-                        Toast.makeText(context, "This product is already selected", Toast.LENGTH_SHORT).show();
-                        int nTag = Integer.valueOf(holder.tvSerialNo.getTag().toString());
-                        if (hmSelectedProducts.containsKey(nTag)) {
-                            holder.spinner.setSelection(alProducts.indexOf(hmSelectedProducts.get(nTag)));
-                        } else {
-                            holder.spinner.setSelection(0);
+        /*if (sStatus.equals("PLACE_ORDER"))
+            holder.spinner.setOnItemSelectedListener(null);
+        else*/
+            holder.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    String sItem = holder.spinner.getSelectedItem().toString();
+                    ArrayList<String> alProductsList = new ArrayList<>(hmSelectedProducts.values());
+                    if (!alProductsList.contains(sItem) && holder.spinner.getSelectedItemPosition() != 0) {
+                        holder.tvUnitPrice.setText(alDBProductsData.get(position).get_unit_price_string());
+                        hmSelectedProducts.put(Integer.valueOf(holder.tvSerialNo.getTag().toString()), sItem);
+                        setSubTotal(holder, holder.etQuantity.getEditText().getText().toString());
+                    } else if (holder.spinner.getSelectedItemPosition() != 0) {
+                        if (alProductsList.contains(sItem)) {
+                            Toast.makeText(context, "This product is already selected", Toast.LENGTH_SHORT).show();
+                            int nTag = Integer.valueOf(holder.tvSerialNo.getTag().toString());
+                            if (hmSelectedProducts.containsKey(nTag)) {
+                                holder.spinner.setSelection(alProducts.indexOf(hmSelectedProducts.get(nTag)));
+                            } else {
+                                holder.spinner.setSelection(0);
+                            }
                         }
                     }
                 }
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
 
-            }
-        });
+                }
+            });
 
         Objects.requireNonNull(holder.etQuantity.getEditText()).addTextChangedListener(new TextWatcher() {
             @Override
@@ -244,6 +247,9 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
         }
     }
 
+    private void initListeners(CreateOrderRVAdapter.ProductsHolder holder){
+
+    }
     private void increaseSize() {
         nSizeOfData = nSizeOfData + 1;
     }
@@ -343,8 +349,9 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
     public void onFragmentMessage(String sCase, int nFlag, String sDate, String sStatus) {
         switch (sCase) {
             case "ADD_BUTTON_CLICKED":
-                if (nSizeOfData == hmSelectedProducts.size())
-                    increaseSize();
+                if (!sStatus.equals("PLACE_ORDER"))
+                    if (nSizeOfData == hmSelectedProducts.size())
+                        increaseSize();
                 /*else if(hmSelectedProducts.size()>nSizeOfData){
                     View view;
                     hmSelectedProducts.clear();
@@ -357,9 +364,9 @@ class ViewOrderRVAdapter extends RecyclerView.Adapter<ViewOrderRVAdapter.Product
                 /*if(nSizeOfData<hmSelectedProducts.size()){
                     increaseSize();
                 }*/
-                else {
-                    Toast.makeText(context, "Select product before adding another item", Toast.LENGTH_SHORT).show();
-                }
+                    else {
+                        Toast.makeText(context, "Select product before adding another item", Toast.LENGTH_SHORT).show();
+                    }
                /* View view;
                 //addProductToList(holder);
                 view = recyclerView.getChildAt(recyclerView.getAdapter().getItemCount() - 1);
